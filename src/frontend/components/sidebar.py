@@ -26,7 +26,7 @@ def render_sidebar() -> None:
 
     with st.sidebar:
         st.markdown("## ⚙️ Gestão de Ativos")
-        st.caption("Sprint 2 — Visualização Operacional")
+        st.caption("Inteligência Operacional de Ativos Industriais")
         st.markdown("---")
 
         st.markdown("### Navegação")
@@ -49,14 +49,4 @@ def render_sidebar() -> None:
         st.metric("Equipamentos cadastrados", total)
 
         st.markdown("---")
-        with st.expander("🗺️ Sobre as Sprints", expanded=False):
-            st.caption(
-                "• **Sprint 1**: cadastro técnico e conversão de sinais  \n"
-                "• **Sprint 2**: dashboards, séries temporais e alertas  \n"
-                "• **Sprint 3**: Painel de Alertas e Estados, resumos por "
-                "IA/NLP e apoio à decisão  \n"
-                "• **Sprint 4**: modelo preditivo & estimativa de RUL  \n"
-                "• **Sprint 5**: integração com sensores reais"
-            )
-
         st.caption("FIAP Challenge • 2025")

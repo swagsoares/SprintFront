@@ -27,6 +27,17 @@ _BADGE_STATUS = {
 
 _PRIORIDADE_ICONE = {health.NORMAL: "🟢", health.ALERTA: "🟡", health.CRITICO: "🔴"}
 
+# Mesmos ícones e ordem de apresentação já usados em `dashboard.py` (`_cards_telemetria`),
+# para que os cards do Painel de Alertas usem a mesma linguagem visual do Dashboard.
+_ICONE_METRICA = {
+    "tensao_v": "🔌",
+    "corrente_a": "⚡",
+    "rpm": "🔄",
+    "temperatura_c": "🌡️",
+    "vibracao_mms": "📳",
+}
+_ORDEM_METRICA = ["tensao_v", "corrente_a", "rpm", "temperatura_c", "vibracao_mms"]
+
 
 def _localizacao(eq: Equipamento) -> str:
     trilha = " › ".join(x for x in [eq.planta, eq.area] if x and x.strip())
@@ -80,8 +91,8 @@ def render_alert_card(
             else "🤖 Resumo automático (heurística local — estrutura pronta para NLP)"
         )
         st.markdown(
-            f"<div style='background:rgba(255,255,255,0.035);border:1px solid "
-            f"rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;margin-bottom:10px;'>"
+            f"<div style='background:rgba(255,255,255,0.02);border:1px solid "
+            f"rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin-bottom:10px;'>"
             f"<div style='font-size:0.75rem;font-weight:600;opacity:.65;"
             f"text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;'>"
             f"{fonte_label}</div>"
@@ -90,17 +101,21 @@ def render_alert_card(
             unsafe_allow_html=True,
         )
 
-        # ---- Chips de métricas-chave
+        # ---- Chips de métricas-chave (mesmo padrão visual de `_cards_telemetria`
+        # em dashboard.py: st.metric nativo, com a mesma sombra sutil definida
+        # globalmente em app.py para todo `div[data-testid="stMetric"]`)
+        metricas_por_chave = {m.chave: m for m in diagnostico.metricas}
         chips = st.columns(5)
-        for col, m in zip(chips, diagnostico.metricas):
-            col.markdown(
-                f"<div style='text-align:center;padding:6px 2px;border-radius:6px;"
-                f"background:rgba(255,255,255,0.03);'>"
-                f"<div style='font-size:0.68rem;opacity:.6'>{m.nome}</div>"
-                f"<div style='font-weight:700;color:{CORES[m.nivel]}'>"
-                f"{m.valor:.1f}{'' if m.unidade=='RPM' else ' ' + m.unidade}</div>"
-                f"</div>",
-                unsafe_allow_html=True,
+        for col, chave in zip(chips, _ORDEM_METRICA):
+            m = metricas_por_chave.get(chave)
+            if not m:
+                continue
+            casas = 0 if chave == "rpm" else 1
+            col.metric(
+                f"{_ICONE_METRICA[chave]} {m.nome.split(' ')[0]}",
+                f"{m.valor:.{casas}f} {m.unidade}",
+                delta=ROTULOS[m.nivel],
+                delta_color=health.delta_color(m.nivel),
             )
 
         # ---- Apoio inicial à decisão
